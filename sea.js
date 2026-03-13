@@ -30,17 +30,54 @@ camera.add(headLight.target);
 scene.add(camera);
 
 // --- ENVIRONMENT ---
+// --- FACETED STALACTITE GENERATOR ---
+function createFacetedColumn(height, radius, isStalactite) {
+    // A cylinder with 5 radial segments gives a nice faceted rock/crystal look
+    const geo = new THREE.CylinderGeometry(radius * 0.2, radius, height, 5, 6);
+    const posAttr = geo.attributes.position;
+
+    // Add randomness to vertices for natural facets
+    for (let i = 0; i < posAttr.count; i++) {
+        const y = posAttr.getY(i);
+        const ratio = 1 - (y + height / 2) / height; // 0 at base, 1 at tip
+        if (ratio > 0.1) { // Keep base relatively stable
+            const jitter = (Math.random() - 0.5) * radius * 0.5;
+            posAttr.setX(i, posAttr.getX(i) + jitter);
+            posAttr.setZ(i, posAttr.getZ(i) + jitter);
+        }
+    }
+    geo.computeVertexNormals();
+
+    const mat = new THREE.MeshPhongMaterial({
+        color: isStalactite ? 0x4a9eff : 0x1a2a4a,
+        flatShading: true,
+        shininess: 80,
+        emissive: isStalactite ? 0x112244 : 0x000000
+    });
+
+    return new THREE.Mesh(geo, mat);
+}
+
 const stalagmites = [];
 function createCavern() {
-    const geo = new THREE.CylinderGeometry(2, 10, 200, 8);
-    const mat = new THREE.MeshPhongMaterial({ color: 0x1a2a4a, flatShading: true });
-    for (let i = 0; i < 80; i++) {
-        const col = new THREE.Mesh(geo, mat);
-        const x = (Math.random() - 0.5) * 1200;
-        const z = (Math.random() - 0.5) * 1200;
-        col.position.set(x, (CEILING_Y + FLOOR_Y) / 2, z);
+    for (let i = 0; i < 120; i++) {
+        const height = 80 + Math.random() * 120;
+        const radius = 5 + Math.random() * 8;
+        const isStalactite = Math.random() > 0.5;
+
+        const col = createFacetedColumn(height, radius, isStalactite);
+        const x = (Math.random() - 0.5) * 1500;
+        const z = (Math.random() - 0.5) * 1500;
+
+        if (isStalactite) {
+            col.rotation.x = Math.PI;
+            col.position.set(x, CEILING_Y - height / 2, z);
+        } else {
+            col.position.set(x, FLOOR_Y + height / 2, z);
+        }
+
         scene.add(col);
-        stalagmites.push({ mesh: col, x, z, r: 10, scanned: false });
+        stalagmites.push({ mesh: col, x, z, r: radius, scanned: false });
     }
     // Floor/Ceiling
     const pGeo = new THREE.PlaneGeometry(3000, 3000);

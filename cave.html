@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Europa Lander | Phase 1</title>
+    <title>Europa Cave Explorer | Phase 2</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background: #000;
+            background: #001;
             font-family: 'Outfit', sans-serif;
             color: #fff;
         }
@@ -23,22 +23,11 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            pointer-events: none;
             background: rgba(0, 0, 0, 0.6);
             padding: 15px;
-            border: 1px solid #4a9eff;
+            border: 1px solid #00fcc;
             border-radius: 5px;
-        }
-
-        .status {
-            font-size: 0.8rem;
-            color: #4a9eff;
-            margin-bottom: 5px;
-        }
-
-        .value {
-            font-size: 1.2rem;
-            font-weight: bold;
+            pointer-events: none;
         }
 
         #msg {
@@ -46,39 +35,37 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 3rem;
             text-align: center;
             display: none;
         }
 
         .btn {
-            background: #4a9eff;
-            color: #fff;
+            background: #00ffcc;
+            color: #000;
             border: none;
             padding: 10px 20px;
             cursor: pointer;
             margin-top: 10px;
             pointer-events: all;
+            font-weight: bold;
         }
     </style>
 </head>
 
 <body>
     <div id="ui">
-        <div class="status">FUEL</div>
-        <div class="value" id="fuel">100%</div>
-        <div style="margin-top:10px" class="status">V-VELOCITY</div>
-        <div class="value" id="vvel">0.0</div>
-        <div style="margin-top:10px" class="status">ALTITUDE</div>
-        <div class="value" id="alt">5000</div>
+        <div style="font-size:0.8rem; color:#00ffcc;">DEPTH PENETRATION</div>
+        <div style="font-size:1.5rem; font-weight:bold;" id="depth">0m</div>
+        <div style="margin-top:10px; font-size:0.8rem; color:#4a9eff;">HULL INTEGRITY</div>
+        <div style="font-size:1.2rem;" id="hull">100%</div>
     </div>
     <div id="msg">
-        <span id="text"></span><br>
-        <button class="btn" onclick="location.reload()">RETRY MISSION</button>
-        <a href="index.html"><button class="btn">RETURN TO HUB</button></a>
+        <h1 id="text" style="font-size:3rem;">MISSION COMPLETE</h1>
+        <button class="btn" onclick="location.reload()">RESTART SECTOR</button>
+        <a href="index.html"><button class="btn">HUB</button></a>
     </div>
     <canvas id="gameCanvas"></canvas>
-    <script src="lander.js"></script>
+    <script src="cave.js"></script>
 </body>
 
 </html>
