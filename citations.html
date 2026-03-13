@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expedition Research Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: radial-gradient(circle at center, #0a1525 0%, #000 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-y: auto;
+            padding: 40px;
+        }
+
+        .dashboard {
+            max-width: 1000px;
+            width: 100%;
+            background: rgba(10, 20, 40, 0.8);
+            border: 2px solid #4a9eff;
+            box-shadow: 0 0 30px rgba(74, 158, 255, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #4a9eff;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #00ffcc;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #4a9eff;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .card h3 {
+            color: #4a9eff;
+            margin-top: 0;
+            border-left: 4px solid #00ffcc;
+            padding-left: 10px;
+            font-size: 1.1rem;
+        }
+
+        .card p {
+            color: #fff;
+            line-height: 1.6;
+            font-family: inherit;
+        }
+
+        .citations {
+            margin-top: 40px;
+            font-size: 0.8rem;
+            color: #888;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 25px;
+            border: 1px solid #00ffcc;
+            color: #00ffcc;
+            text-decoration: none;
+            transition: 0.3s;
+            border-radius: 5px;
+        }
+
+        .back-btn:hover {
+            background: #00ffcc;
+            color: #000;
+        }
+
+        .stat {
+            color: #00ffcc;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>Mission Data Archive</h1>
+            <p>Classified Expedition Intelligence: Moon <b>EUROPA</b></p>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>Physical Profile</h3>
+                <p>Diameter: <span class="stat">~3,100 km</span> (About 1/4 the size of Earth). Almost exactly the size
+                    of Earth's Moon.</p>
+                <p>Surface: <span class="stat">Water Ice & Salts</span>. One of the smoothest objects in the solar
+                    system.</p>
+            </div>
+            <div class="card">
+                <h3>Atmosphere & Temp</h3>
+                <p>Air: <span class="stat">Thin Oxygen</span> atmosphere. Not breathable, but biologically significant.
+                </p>
+                <p>Temp: <span class="stat">-260°F</span> (-160°C) at the equator. Deadly surface cold protects the
+                    ocean below.</p>
+            </div>
+            <div class="card">
+                <h3>Orbital Mechanics</h3>
+                <p>Distance: <span class="stat">670,900 km</span> from Jupiter. Constantly flexed by Jupiter's massive
+                    gravity.</p>
+                <p>Orbit: <span class="stat">3.55 Earth Days</span>. Synchronously locked with Jupiter.</p>
+            </div>
+            <div class="card">
+                <h3>The Liedenbrock Sea</h3>
+                <p>Ocean: <span class="stat">Saltwater Liquid</span>. Contains more water than all of Earth's oceans
+                    combined.</p>
+                <p>Life Potential: <span class="stat">Hydrothermal Vents</span>. High chance of chemo-synthetic life
+                    near the floor.</p>
+            </div>
+        </div>
+
+        <div class="citations">
+            <p><b>SOURCES & CITATIONS:</b></p>
+            <ul>
+                <li>NASA Jet Propulsion Laboratory (JPL) - Europa Clipper Mission Profile</li>
+                <li>Pappalardo, R. T., et al. "Europa," University of Arizona Press.</li>
+                <li>Nature Geoscience - Subsurface Water Exchange on Europa.</li>
+                <li>ESA JUICE Mission Archive - Jovian Icy Moons Explorer Data.</li>
+            </ul>
+        </div>
+
+        <a href="hub.html" class="back-btn">← RETURN TO HUB</a>
+    </div>
+</body>
+
+</html>

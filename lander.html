@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Europa Lander | Phase 1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Outfit', sans-serif;
+            color: #fff;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border: 1px solid #4a9eff;
+            border-radius: 5px;
+        }
+
+        .status {
+            font-size: 0.8rem;
+            color: #4a9eff;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        #msg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            text-align: center;
+            display: none;
+        }
+
+        .btn {
+            background: #4a9eff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 10px;
+            pointer-events: all;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ui">
+        <div class="status">FUEL</div>
+        <div class="value" id="fuel">100%</div>
+        <div style="margin-top:10px" class="status">V-VELOCITY</div>
+        <div class="value" id="vvel">0.0</div>
+        <div style="margin-top:10px" class="status">ALTITUDE</div>
+        <div class="value" id="alt">5000</div>
+    </div>
+    <div id="msg">
+        <span id="text"></span><br>
+        <button class="btn" onclick="location.reload()">RETRY MISSION</button>
+        <a href="hub.html"><button class="btn">RETURN TO HUB</button></a>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <script src="lander.js"></script>
+</body>
+
+</html>

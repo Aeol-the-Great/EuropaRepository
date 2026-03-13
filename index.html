@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expedition Europa | The Liedenbrock Sea</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="ui-overlay">
+        <div id="cockpit-overlay">
+            <div id="viewport-frame"></div>
+        </div>
+
+        <div class="objective-counter" id="objectives">
+            INITIATING SCAN...
+        </div>
+
+        <div class="hud-top">
+            <div class="mission-info">
+                <div class="mission-title">Liedenbrock Sea Explorer</div>
+                <div class="coordinates">LAT: 14.22'N | LONG: 125.4'W</div>
+            </div>
+            <div class="status">
+                <div class="controls-hint">
+                    WASD: THRUSTERS<br>
+                    SHIFT/CTL: ASCEND/DESCEND<br>
+                    MOUSE: ROTATE CAMERA
+                </div>
+            </div>
+        </div>
+
+        <div class="hud-bottom">
+            <div class="telemetry">
+                <div class="depth-meter" id="depth">15.2</div>
+                <div class="depth-label">DEPTH (KM BELOW ICE)</div>
+                <div class="thruster-bar">
+                    <div id="thruster-fill" class="thruster-fill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js from CDN -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="sea.js"></script>
+</body>
+
+</html>
