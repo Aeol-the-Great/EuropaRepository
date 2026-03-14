@@ -112,17 +112,26 @@ const species = [
 function createBeings() {
     species.forEach((s, sIdx) => {
         const count = 40; // Balanced density
-        
+
         // Custom Jellyfish Marker Geometry
         const markerGeo = new THREE.RingGeometry(1.5, 2, 16);
         const markerMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc, side: THREE.DoubleSide, transparent: true, opacity: 0.9 });
-        
+
         for (let i = 0; i < count; i++) {
             const group = new THREE.Group();
-            const body = new THREE.Mesh(new THREE.SphereGeometry(1.2), new THREE.MeshBasicMaterial({ color: s.color, transparent: true, opacity: 0.8 }));
-            group.add(body);
-            const light = new THREE.PointLight(s.color, 4, 30); group.add(light);
             
+            // Core Body
+            const bodyGeo = new THREE.SphereGeometry(1.2, 12, 12);
+            const bodyMat = new THREE.MeshBasicMaterial({ color: s.color });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            group.add(body);
+            
+            // Glow Halo (Zero performance cost compared to PointLight)
+            const haloGeo = new THREE.SphereGeometry(2.5, 12, 12);
+            const haloMat = new THREE.MeshBasicMaterial({ color: s.color, transparent: true, opacity: 0.15, depthWrite: false });
+            const halo = new THREE.Mesh(haloGeo, haloMat);
+            group.add(halo);
+
             // Add Mission objective hover marker
             if (s.name === "Jelly") {
                 const marker = new THREE.Mesh(markerGeo, markerMat);
@@ -245,7 +254,7 @@ function animate() {
     // Interactions
     creatures.forEach((c, idx) => {
         c.group.position.add(c.vel);
-        
+
         // Billboard the marker to face the camera
         if (c.group.userData.marker) {
             c.group.userData.marker.lookAt(camera.position);

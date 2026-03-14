@@ -82,6 +82,7 @@ function initLevel(seamless = false) {
         worldWidth = terrain[terrain.length - 1].x;
         backBarrierX = oldWorldWidth - 50; // Block off the previous pad area
         ship.landed = false;
+        ship.fuel = 100; // Refill to true 100%
         transitioning = false;
     }
 }
@@ -122,12 +123,34 @@ function drawWorld() {
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // The Current Destination Pad
+    // Pad Background Station
+    let pxStart = terrain[padStart].x - cameraX;
+    let pyStart = terrain[padStart].y;
+    let pWidth = terrain[padEnd].x - terrain[padStart].x;
+    
+    ctx.fillStyle = "#222";
+    ctx.fillRect(pxStart + pWidth * 0.2, pyStart - 60, pWidth * 0.6, 60);
+    
+    ctx.strokeStyle = "#ff4444";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(pxStart + pWidth * 0.3, pyStart - 60); ctx.lineTo(pxStart + pWidth * 0.3, pyStart - 90);
+    ctx.moveTo(pxStart + pWidth * 0.7, pyStart - 60); ctx.lineTo(pxStart + pWidth * 0.7, pyStart - 80);
+    ctx.stroke();
+    if (Date.now() % 1000 < 500) {
+        ctx.fillStyle = "#ff0000";
+        ctx.fillRect(pxStart + pWidth * 0.3 - 2, pyStart - 92, 4, 4);
+        ctx.fillRect(pxStart + pWidth * 0.7 - 2, pyStart - 82, 4, 4);
+    }
+
+    ctx.fillStyle = "#2a2a2a";
+    ctx.fillRect(pxStart, pyStart, pWidth, canvas.height - pyStart);
+
     ctx.strokeStyle = "#00ffcc";
     ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.moveTo(terrain[padStart].x - cameraX, terrain[padStart].y);
-    ctx.lineTo(terrain[padEnd].x - cameraX, terrain[padEnd].y);
+    ctx.moveTo(pxStart, pyStart);
+    ctx.lineTo(pxStart + pWidth, pyStart);
     ctx.stroke();
 
     // Outposts
@@ -142,15 +165,7 @@ function drawWorld() {
         }
     });
 
-    // Back Barrier
-    if (backBarrierX > 0) {
-        ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
-        ctx.fillRect(0, 0, backBarrierX - cameraX, canvas.height);
-        ctx.strokeStyle = "red";
-        ctx.beginPath();
-        ctx.moveTo(backBarrierX - cameraX, 0); ctx.lineTo(backBarrierX - cameraX, canvas.height);
-        ctx.stroke();
-    }
+    // Border cutoff handled by camera clamp
 }
 
 function drawShip() {
@@ -187,6 +202,13 @@ function update() {
         ship.x += ship.vx;
         ship.y += ship.vy;
         ship.fuel = Math.max(0, ship.fuel);
+    } else {
+        // Wilderness Takeoff
+        if (ship.fuel > 0 && (keys['KeyS'] || keys['Space'])) {
+            ship.landed = false;
+            ship.y -= 2; // Bump off surface
+            ship.vy = -0.5;
+        }
     }
 
     // Barrier Collision
@@ -196,7 +218,7 @@ function update() {
     }
 
     cameraX = ship.x - canvas.width / 2;
-    cameraX = Math.max(0, Math.min(worldWidth - canvas.width, cameraX));
+    cameraX = Math.max(backBarrierX, Math.min(worldWidth - canvas.width, cameraX));
 
     outposts.forEach(o => {
         if (!o.used && Math.abs(ship.x - o.x) < 30 && Math.abs(ship.y - (o.y - 15)) < 30) {
@@ -222,13 +244,13 @@ function checkCollision() {
     if (ship.y + 15 >= seg.y) {
         ship.y = seg.y - 15;
         const segIdx = terrain.indexOf(seg);
-        
+
         // Universal Safe Landing Check
         if (Math.abs(ship.vy) <= SAFE_SPEED && Math.abs(ship.angle) < 0.3) {
             ship.landed = true;
             ship.vx = 0;
             ship.vy = 0;
-            
+
             // Check if we landed on the official progression pad
             if (segIdx >= padStart && segIdx <= padEnd) {
                 if (currentLevelIdx < LEVELS.length - 1) {
@@ -241,7 +263,7 @@ function checkCollision() {
             }
             // If safely landed elsewhere, they can just take off again (landed state handles this)
         } else {
-            ship.alive = false; 
+            ship.alive = false;
             endGame(Math.abs(ship.vy) > SAFE_SPEED ? "CRITICAL IMPACT" : "ROUGH IMPACT");
         }
     }
