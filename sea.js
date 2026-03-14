@@ -2,10 +2,12 @@ import * as THREE from 'three';
 
 // --- CONFIG ---
 const WATER_COLOR = 0x011a3a;
-const FOG_DENSITY = 0.04;
+const FOG_DENSITY = 0.1;
 const CEILING_Y = 50;
 const FLOOR_Y = -150;
-const RENDER_DISTANCE = 100;
+const RENDER_DISTANCE = 150;
+const BASE_CULL = 40;
+const LIGHT_CULL = 80;
 
 // --- CHALLENGE STATE ---
 let objectives = { jellyfish: 0, crystals: 0, scans: 0 };
@@ -13,15 +15,16 @@ const TARGET = 3;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(WATER_COLOR);
-scene.fog = new THREE.FogExp2(WATER_COLOR, FOG_DENSITY);
+scene.fog = new THREE.Fog(WATER_COLOR, 40, 60); // Fog matches culling bubble
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1500);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, FLOOR_Y + 10, 50);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // --- LIGHTING ---
-scene.add(new THREE.AmbientLight(0x1a2a4a, 0.5));
+scene.add(new THREE.AmbientLight(0x1a2a4a, 1.2));
 const headLight = new THREE.SpotLight(0xffffff, 5, 200, Math.PI / 4, 0.5);
 camera.add(headLight);
 headLight.position.set(0, 0, 1);
@@ -58,16 +61,19 @@ function createFacetedColumn(height, radius, isStalactite) {
     return new THREE.Mesh(geo, mat);
 }
 
+// --- ENVIRONMENT ---
+
 const stalagmites = [];
 function createCavern() {
     for (let i = 0; i < 120; i++) {
-        const height = 80 + Math.random() * 120;
-        const radius = 5 + Math.random() * 8;
+        const height = 40 + Math.random() * 80;
+        const radius = 3 + Math.random() * 5;
         const isStalactite = Math.random() > 0.5;
 
         const col = createFacetedColumn(height, radius, isStalactite);
-        const x = (Math.random() - 0.5) * 1500;
-        const z = (Math.random() - 0.5) * 1500;
+        // Cluster them more densely around the origin too
+        const x = (Math.random() - 0.5) * 1200;
+        const z = (Math.random() - 0.5) * 1200;
 
         if (isStalactite) {
             col.rotation.x = Math.PI;
@@ -79,11 +85,17 @@ function createCavern() {
         scene.add(col);
         stalagmites.push({ mesh: col, x, z, r: radius, scanned: false });
     }
-    // Floor/Ceiling
-    const pGeo = new THREE.PlaneGeometry(3000, 3000);
-    const fMat = new THREE.MeshStandardMaterial({ color: 0x0a1a2a });
-    const floor = new THREE.Mesh(pGeo, fMat); floor.rotation.x = -Math.PI / 2; floor.position.y = FLOOR_Y; scene.add(floor);
-    const ceil = new THREE.Mesh(pGeo, new THREE.MeshStandardMaterial({ color: 0x4a9eff, transparent: true, opacity: 0.2 }));
+    // Floor/Ceiling with clear visibility
+    const fMat = new THREE.MeshStandardMaterial({
+        color: 0x0a1a2a,
+        emissive: 0x001122, // Subtle glow to prevent "pitch black"
+        roughness: 0.8
+    });
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000), fMat);
+    floor.rotation.x = -Math.PI / 2; floor.position.y = FLOOR_Y; scene.add(floor);
+
+    const cMat = new THREE.MeshStandardMaterial({ color: 0x4a9eff, transparent: true, opacity: 0.1, emissive: 0x224488 });
+    const ceil = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000), cMat);
     ceil.rotation.x = Math.PI / 2; ceil.position.y = CEILING_Y; scene.add(ceil);
 }
 createCavern();
@@ -99,27 +111,82 @@ const species = [
 
 function createBeings() {
     species.forEach((s, sIdx) => {
-        for (let i = 0; i < 15; i++) {
+        const count = 40; // Balanced density
+        for (let i = 0; i < count; i++) {
             const group = new THREE.Group();
-            const body = new THREE.Mesh(new THREE.SphereGeometry(0.8), new THREE.MeshBasicMaterial({ color: s.color, transparent: true, opacity: 0.8 }));
+            const body = new THREE.Mesh(new THREE.SphereGeometry(1.2), new THREE.MeshBasicMaterial({ color: s.color, transparent: true, opacity: 0.8 }));
             group.add(body);
-            const light = new THREE.PointLight(s.color, 2, 20); group.add(light);
+            const light = new THREE.PointLight(s.color, 4, 30); group.add(light);
 
-            group.position.set((Math.random() - 0.5) * 800, FLOOR_Y + 20 + Math.random() * 150, (Math.random() - 0.5) * 800);
+            group.position.set((Math.random() - 0.5) * 1200, FLOOR_Y + 10 + Math.random() * 160, (Math.random() - 0.5) * 1200);
             scene.add(group);
-            creatures.push({ group, type: s.name, vel: new THREE.Vector3((Math.random() - 0.5) * 0.2, (Math.random() - 0.5) * 0.1, (Math.random() - 0.5) * 0.2) });
+            creatures.push({ group, type: s.name, vel: new THREE.Vector3((Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.15, (Math.random() - 0.5) * 0.3) });
         }
     });
 }
 createBeings();
 
+// --- SEARCHLIGHT ENHANCEMENT ---
+const searchLight = new THREE.SpotLight(0xffffff, 100, 500, Math.PI / 6, 0.4, 0.5);
+searchLight.position.set(0, 0, 1);
+camera.add(searchLight);
+searchLight.target.position.set(0, 0, -20);
+camera.add(searchLight.target);
+scene.add(camera);
+
+// --- REFINED VISIBILITY & CULLING ---
+
+// --- PLAYER-CENTRIC VISIBILITY SENSOR ---
+const playerPos = new THREE.Vector3();
+const objPos = new THREE.Vector3();
+
+function updateMaterials() {
+    camera.getWorldPosition(playerPos);
+    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+
+    scene.traverse(obj => {
+        if (obj.isMesh && obj.material && obj.material.fog !== undefined) {
+            // Environment (Floor/Ceiling) remains constant visual anchors
+            if (obj.geometry.type === "PlaneGeometry") {
+                obj.visible = true;
+                obj.material.fog = true;
+                return;
+            }
+
+            obj.getWorldPosition(objPos);
+            const dist = playerPos.distanceTo(objPos);
+
+            // Calculate angle relative to player forward
+            const toObj = objPos.clone().sub(playerPos).normalize();
+            const angle = toObj.angleTo(forward);
+
+            // Sensor Logic: 2x boost in the directional light cone
+            const inLightCone = angle < (Math.PI / 8);
+            const visibilityLimit = inLightCone ? LIGHT_CULL : BASE_CULL;
+
+            if (dist < visibilityLimit) {
+                obj.visible = true;
+                // Cone dispels fog for "Searchlight" effect
+                if (inLightCone) {
+                    obj.material.fog = false;
+                } else {
+                    // Gradual fade starts at 30m
+                    obj.material.fog = (dist > 30);
+                }
+            } else {
+                obj.visible = false;
+            }
+        }
+    });
+}
+
 const crystals = [];
 function createCrystals() {
     const geo = new THREE.OctahedronGeometry(3);
     const mat = new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x00ffff });
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 60; i++) {
         const c = new THREE.Mesh(geo, mat);
-        c.position.set((Math.random() - 0.5) * 900, FLOOR_Y + 2, (Math.random() - 0.5) * 900);
+        c.position.set((Math.random() - 0.5) * 1200, FLOOR_Y + 2, (Math.random() - 0.5) * 1200);
         scene.add(c);
         crystals.push(c);
     }
@@ -142,7 +209,7 @@ document.addEventListener('mousemove', e => {
 document.addEventListener('click', () => document.body.requestPointerLock());
 
 let vel = new THREE.Vector3();
-camera.position.set(0, 0, 50);
+// Initial position set above near camera creation
 
 function animate() {
     requestAnimationFrame(animate);
@@ -192,6 +259,7 @@ function animate() {
     });
 
     updateHUD();
+    updateMaterials();
     renderer.render(scene, camera);
 }
 

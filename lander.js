@@ -227,9 +227,9 @@ function checkCollision() {
                 ship.landed = true;
                 if (currentLevelIdx < LEVELS.length - 1) {
                     currentLevelIdx++;
-                    setTimeout(() => initLevel(true), 1500);
+                    initLevel(true); // Instant seamless transition
                 } else {
-                    endGame("MISSION SUCCESS: SURFACE REACHED");
+                    endGame("MISSION SUCCESS: EUROPA CONQUERED");
                     setTimeout(() => window.location.href = "cave.html", 3000);
                 }
             } else {
@@ -241,10 +241,17 @@ function checkCollision() {
     }
 }
 
+// --- REFINED HUD & RETRY LOGIC ---
 function updateHUD() {
-    document.getElementById('fuel').innerText = Math.floor(ship.fuel) + '%';
-    document.getElementById('vvel').innerText = Math.abs(ship.vy).toFixed(1);
-    document.getElementById('alt').innerText = Math.floor(canvas.height - ship.y);
+    const fuelEl = document.getElementById('fuel');
+    const vvelEl = document.getElementById('vvel');
+    const altEl = document.getElementById('alt');
+    if (fuelEl) fuelEl.innerText = Math.floor(ship.fuel) + '%';
+    if (vvelEl) {
+        vvelEl.innerText = Math.abs(ship.vy).toFixed(1);
+        vvelEl.style.color = Math.abs(ship.vy) > SAFE_SPEED ? '#ff4444' : '#00ffcc';
+    }
+    if (altEl) altEl.innerText = Math.max(0, Math.floor(canvas.height - ship.y));
 }
 
 function endGame(text) {
@@ -253,6 +260,36 @@ function endGame(text) {
     msg.style.display = 'block';
     txt.innerText = text;
     txt.style.color = ship.landed ? "#00ffcc" : "#ff4444";
+
+    // Set up RETRY ZONE button
+    const retryBtn = document.querySelector('.btn[onclick="location.reload()"]');
+    if (retryBtn) {
+        retryBtn.innerText = "RETRY ZONE";
+        retryBtn.removeAttribute('onclick');
+        retryBtn.onclick = () => {
+            msg.style.display = 'none';
+            resetToLevelStart();
+        };
+    }
+}
+
+function resetToLevelStart() {
+    ship.alive = true;
+    ship.landed = false;
+    ship.fuel = LEVELS[currentLevelIdx].fuel;
+    ship.angle = 0;
+    ship.vx = 1.5;
+    ship.vy = 0;
+    ship.y = 100;
+
+    // Find the x position of the start of the current level
+    // Each level has 60 segments.
+    let segmentIndex = 0;
+    for (let i = 0; i < currentLevelIdx; i++) {
+        segmentIndex += 60 * LEVELS[i].width;
+    }
+    ship.x = terrain[segmentIndex].x + 200;
+    cameraX = ship.x - canvas.width / 2;
 }
 
 function loop() {
