@@ -72,8 +72,8 @@ function createCavern() {
 
         const col = createFacetedColumn(height, radius, isStalactite);
         // Cluster them more densely around the origin too
-        const x = (Math.random() - 0.5) * 1200;
-        const z = (Math.random() - 0.5) * 1200;
+        const x = (Math.random() - 0.5) * 600;
+        const z = (Math.random() - 0.5) * 600;
 
         if (isStalactite) {
             col.rotation.x = Math.PI;
@@ -91,11 +91,11 @@ function createCavern() {
         emissive: 0x001122, // Subtle glow to prevent "pitch black"
         roughness: 0.8
     });
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000), fMat);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(600, 600), fMat);
     floor.rotation.x = -Math.PI / 2; floor.position.y = FLOOR_Y; scene.add(floor);
 
     const cMat = new THREE.MeshStandardMaterial({ color: 0x4a9eff, transparent: true, opacity: 0.1, emissive: 0x224488 });
-    const ceil = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000), cMat);
+    const ceil = new THREE.Mesh(new THREE.PlaneGeometry(600, 600), cMat);
     ceil.rotation.x = Math.PI / 2; ceil.position.y = CEILING_Y; scene.add(ceil);
 }
 createCavern();
@@ -112,13 +112,27 @@ const species = [
 function createBeings() {
     species.forEach((s, sIdx) => {
         const count = 40; // Balanced density
+        
+        // Custom Jellyfish Marker Geometry
+        const markerGeo = new THREE.RingGeometry(1.5, 2, 16);
+        const markerMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc, side: THREE.DoubleSide, transparent: true, opacity: 0.9 });
+        
         for (let i = 0; i < count; i++) {
             const group = new THREE.Group();
             const body = new THREE.Mesh(new THREE.SphereGeometry(1.2), new THREE.MeshBasicMaterial({ color: s.color, transparent: true, opacity: 0.8 }));
             group.add(body);
             const light = new THREE.PointLight(s.color, 4, 30); group.add(light);
+            
+            // Add Mission objective hover marker
+            if (s.name === "Jelly") {
+                const marker = new THREE.Mesh(markerGeo, markerMat);
+                marker.position.y = 3.5;
+                // Billboard effect is handled in animate loop
+                group.add(marker);
+                group.userData.marker = marker;
+            }
 
-            group.position.set((Math.random() - 0.5) * 1200, FLOOR_Y + 10 + Math.random() * 160, (Math.random() - 0.5) * 1200);
+            group.position.set((Math.random() - 0.5) * 600, FLOOR_Y + 10 + Math.random() * 160, (Math.random() - 0.5) * 600);
             scene.add(group);
             creatures.push({ group, type: s.name, vel: new THREE.Vector3((Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.15, (Math.random() - 0.5) * 0.3) });
         }
@@ -186,7 +200,7 @@ function createCrystals() {
     const mat = new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x00ffff });
     for (let i = 0; i < 60; i++) {
         const c = new THREE.Mesh(geo, mat);
-        c.position.set((Math.random() - 0.5) * 1200, FLOOR_Y + 2, (Math.random() - 0.5) * 1200);
+        c.position.set((Math.random() - 0.5) * 600, FLOOR_Y + 2, (Math.random() - 0.5) * 600);
         scene.add(c);
         crystals.push(c);
     }
@@ -224,11 +238,19 @@ function animate() {
     camera.position.add(vel);
 
     // Collision & Objectives
+    camera.position.x = Math.max(-300, Math.min(300, camera.position.x));
     camera.position.y = Math.max(FLOOR_Y + 5, Math.min(CEILING_Y - 5, camera.position.y));
+    camera.position.z = Math.max(-300, Math.min(300, camera.position.z));
 
     // Interactions
     creatures.forEach((c, idx) => {
         c.group.position.add(c.vel);
+        
+        // Billboard the marker to face the camera
+        if (c.group.userData.marker) {
+            c.group.userData.marker.lookAt(camera.position);
+        }
+
         const dist = camera.position.distanceTo(c.group.position);
         if (dist < 8 && c.type === "Jelly" && objectives.jellyfish < TARGET) {
             objectives.jellyfish++;
