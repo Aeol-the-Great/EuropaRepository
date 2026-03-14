@@ -46,7 +46,7 @@ function initCave() {
     ship.vy = 0;
     ship.angle = Math.PI / 2;
     ship.landed = false;
-    
+
     // Initial 20 segments
     for (let i = 0; i < 20; i++) {
         let curY = lastY + i * SLANT_STEP;

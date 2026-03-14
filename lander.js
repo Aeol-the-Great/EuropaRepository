@@ -222,9 +222,15 @@ function checkCollision() {
     if (ship.y + 15 >= seg.y) {
         ship.y = seg.y - 15;
         const segIdx = terrain.indexOf(seg);
-        if (segIdx >= padStart && segIdx <= padEnd) {
-            if (Math.abs(ship.vy) <= SAFE_SPEED && Math.abs(ship.angle) < 0.3) {
-                ship.landed = true;
+        
+        // Universal Safe Landing Check
+        if (Math.abs(ship.vy) <= SAFE_SPEED && Math.abs(ship.angle) < 0.3) {
+            ship.landed = true;
+            ship.vx = 0;
+            ship.vy = 0;
+            
+            // Check if we landed on the official progression pad
+            if (segIdx >= padStart && segIdx <= padEnd) {
                 if (currentLevelIdx < LEVELS.length - 1) {
                     currentLevelIdx++;
                     initLevel(true); // Instant seamless transition
@@ -232,11 +238,11 @@ function checkCollision() {
                     endGame("MISSION SUCCESS: EUROPA CONQUERED");
                     setTimeout(() => window.location.href = "cave.html", 3000);
                 }
-            } else {
-                ship.alive = false; endGame("CRITICAL IMPACT");
             }
+            // If safely landed elsewhere, they can just take off again (landed state handles this)
         } else {
-            ship.alive = false; endGame("ROUGH IMPACT");
+            ship.alive = false; 
+            endGame(Math.abs(ship.vy) > SAFE_SPEED ? "CRITICAL IMPACT" : "ROUGH IMPACT");
         }
     }
 }
