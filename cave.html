@@ -17,6 +17,7 @@
 
         canvas {
             display: block;
+            cursor: crosshair;
         }
 
         #ui {
@@ -53,11 +54,27 @@
 </head>
 
 <body>
+    <div id="start-screen" style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; color: white;">
+        <h1 style="color: #00ffcc; font-size: 3rem; margin-bottom: 20px;">MISSION: CAVE DESCENT</h1>
+        <p style="font-size: 1.2rem; max-width: 600px; line-height: 1.5; margin-bottom: 30px;">
+            Descend 35.0 km down the slanted subterranean ice tubes.<br><br>
+            <b>CONTROLS:</b><br>
+            A / D : Rotate spacecraft<br>
+            W / SPACE : Main antimatter thruster<br>
+            MOUSE CLICK : Auto-aim laser defense<br><br>
+            <b>OBJECTIVE:</b><br>
+            Avoid smashing the hull. Lock on and destroy red falling stalactites before they detonate. 
+        </p>
+        <button id="start-btn" style="background:#00ffcc; color:#000; border:none; padding:15px 30px; font-size:1.2rem; font-weight: bold; cursor:pointer;" onclick="startGame()">INITIATE DESCENT</button>
+    </div>
+
     <div id="ui">
         <div style="font-size:0.8rem; color:#00ffcc;">DEPTH PENETRATION</div>
         <div style="font-size:1.5rem; font-weight:bold;" id="depth">0m</div>
         <div style="margin-top:10px; font-size:0.8rem; color:#4a9eff;">HULL INTEGRITY</div>
         <div style="font-size:1.2rem;" id="hull">100%</div>
+        <div style="margin-top:10px; font-size:0.8rem; color:#ffaa00;">THREAT NEUTRALIZATION SCORE</div>
+        <div style="font-size:1.2rem; font-weight:bold; color:#ffaa00;" id="score">0</div>
     </div>
     <div id="msg">
         <h1 id="text" style="font-size:3rem;">MISSION COMPLETE</h1>

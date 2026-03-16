@@ -64,6 +64,19 @@
 </head>
 
 <body>
+    <div id="start-screen" style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center;">
+        <h1 style="color: #4a9eff; font-size: 3rem; margin-bottom: 20px;">MISSION: EUROPA LANDER</h1>
+        <p style="font-size: 1.2rem; max-width: 600px; line-height: 1.5; margin-bottom: 30px;">
+            Navigate the treacherous ice valleys of Jupiter's moon. <br><br>
+            <b>CONTROLS:</b><br>
+            A / D : Rotate spacecraft<br>
+            W / SPACE : Main thruster<br><br>
+            <b>OBJECTIVE:</b><br>
+            Land softly (V-Velocity &lt; 1.3) on the glowing cyan progression pads. Touching down on wilderness terrain securely rests your ship, but consumes fuel on takeoff.
+        </p>
+        <button id="start-btn" style="background:#4a9eff; color:#fff; border:none; padding:15px 30px; font-size:1.2rem; cursor:pointer;" onclick="startGame()">COMMENCE OPERATION</button>
+    </div>
+
     <div id="ui">
         <div class="status">FUEL</div>
         <div class="value" id="fuel">100%</div>

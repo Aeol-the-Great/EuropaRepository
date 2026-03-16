@@ -10,9 +10,24 @@
 </head>
 
 <body>
+    <div id="start-screen" style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; color: white;">
+        <h1 style="color: #00ffcc; font-size: 3rem; margin-bottom: 20px;">MISSION: LIEDENBROCK SEA SAFARI</h1>
+        <p style="font-size: 1.2rem; max-width: 600px; line-height: 1.5; margin-bottom: 30px;">
+            Explore the abyssal depths of Europa's inner ocean.<br><br>
+            <b>CONTROLS:</b><br>
+            W A S D : Submarine thrusters<br>
+            SPACE / SHIFT : Ascend / Descend<br>
+            MOUSE : Camera & Target designator<br><br>
+            <b>OBJECTIVE:</b><br>
+            Follow the HUD waypoints. Collect 3 Jellyfish, gather 3 glowing crystals, and scan 3 ancient columns to complete the mission.<br><br>
+            <i>Note: Clicking will capture your mouse pointer. Press ESC to release.</i>
+        </p>
+        <button id="start-btn" style="background:#00ffcc; color:#000; border:none; padding:15px 30px; font-size:1.2rem; font-weight: bold; cursor:pointer;" onclick="startGame()">DIVE</button>
+    </div>
+
     <div id="ui-overlay">
-
-
+        <!-- Dynamic HUD Markers Container -->
+        <div id="markers-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20;"></div>
         <div class="objective-counter" id="objectives">
             INITIATING SCAN...
         </div>

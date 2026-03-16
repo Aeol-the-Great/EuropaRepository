@@ -27,6 +27,12 @@ let cameraX = 0;
 let backBarrierX = 0; // Moves forward to block previous levels
 let padStart, padEnd;
 let transitioning = false;
+let gameStarted = false;
+
+window.startGame = function() {
+    document.getElementById('start-screen').style.display = 'none';
+    gameStarted = true;
+};
 
 const keys = {};
 window.addEventListener('keydown', e => keys[e.code] = true);
@@ -81,21 +87,41 @@ function initLevel(seamless = false) {
         generateTerrain(terrain.length, 60 * level.width, level.width, level.color);
         worldWidth = terrain[terrain.length - 1].x;
         backBarrierX = oldWorldWidth - 50; // Block off the previous pad area
+        
+        // Spawn in the air like Level 1
         ship.landed = false;
-        ship.fuel = 100; // Refill to true 100%
+        ship.fuel = 100;
+        ship.x = oldWorldWidth + 200;
+        ship.y = 100;
+        ship.vx = 1.5;
+        ship.vy = 0;
+        ship.angle = 0;
+        
         transitioning = false;
     }
 }
+
+// --- ASSETS ---
+const bgImage = new Image();
+bgImage.src = 'lander-bg.png';
 
 function drawBackground() {
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = "#fff";
-    for (let i = 0; i < 50; i++) {
-        let x = (Math.sin(i * 123) * 1000 + 1000) % canvas.width;
-        let y = (Math.cos(i * 456) * 1000 + 1000) % canvas.height;
-        ctx.fillRect(x, y, 1, 1);
+    if (bgImage.complete && bgImage.naturalWidth !== 0) {
+        // Draw the custom pixel art background sharply without scrolling
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingEnabled = true; // Restore for other drawings if needed
+    } else {
+        // Fallback starfield while loading
+        ctx.fillStyle = "#fff";
+        for (let i = 0; i < 50; i++) {
+            let x = (Math.sin(i * 123) * 1000 + 1000) % canvas.width;
+            let y = (Math.cos(i * 456) * 1000 + 1000) % canvas.height;
+            ctx.fillRect(x, y, 1, 1);
+        }
     }
 
     ctx.save();
@@ -186,7 +212,7 @@ function drawShip() {
 }
 
 function update() {
-    if (!ship.alive || (ship.landed && currentLevelIdx === LEVELS.length - 1)) return;
+    if (!gameStarted || !ship.alive || (ship.landed && currentLevelIdx === LEVELS.length - 1)) return;
 
     if (!ship.landed) {
         ship.vy += GRAVITY;
@@ -211,10 +237,11 @@ function update() {
         }
     }
 
-    // Barrier Collision
-    if (ship.x < backBarrierX + 20) {
-        ship.x = backBarrierX + 20;
-        ship.vx = Math.abs(ship.vx) * 0.5;
+    // Barrier Collision (Out of bounds = restart)
+    if (ship.x < backBarrierX || ship.x > worldWidth || ship.y < -3000) {
+        ship.alive = false;
+        endGame("LOST IN DEEP SPACE");
+        return;
     }
 
     cameraX = ship.x - canvas.width / 2;
@@ -237,7 +264,10 @@ function checkCollision() {
     // Find segment
     const seg = terrain.find((p, i) => i < terrain.length - 1 && ship.x >= p.x && ship.x <= terrain[i + 1].x);
     if (!seg) {
-        if (ship.x > worldWidth) ship.alive = false;
+        if (ship.x > worldWidth) {
+            ship.alive = false;
+            endGame("LOST IN DEEP SPACE");
+        }
         return;
     }
 
@@ -304,7 +334,7 @@ function endGame(text) {
 function resetToLevelStart() {
     ship.alive = true;
     ship.landed = false;
-    ship.fuel = LEVELS[currentLevelIdx].fuel;
+    ship.fuel = 100; // ALWAYS REFILL TO MAX
     ship.angle = 0;
     ship.vx = 1.5;
     ship.vy = 0;
